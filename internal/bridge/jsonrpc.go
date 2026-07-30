@@ -1,6 +1,9 @@
 package bridge
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
+)
 
 const JSONRPCVersion = "2.0"
 
@@ -35,3 +38,9 @@ type EventParams struct {
 }
 
 const EventMethod = "event"
+
+// Caller is implemented by WebSocket and test mocks.
+type Caller interface {
+	Call(ctx context.Context, method string, params any) (json.RawMessage, error)
+	Connected() bool
+}

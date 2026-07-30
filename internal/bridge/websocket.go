@@ -25,14 +25,23 @@ var upgrader = websocket.Upgrader{
 
 type EventHandler func(eventType string, data json.RawMessage)
 
+// PluginInfo is cached from the Godot plugin after connect.
+type PluginInfo struct {
+	Plugin        string `json:"plugin"`
+	PluginVersion string `json:"plugin_version"`
+	GodotVersion  string `json:"godot_version"`
+	ProjectName   string `json:"project_name"`
+}
+
 // WebSocket implements JSON-RPC transport to the Godot plugin.
 type WebSocket struct {
-	addr    string
-	mu      sync.RWMutex
-	conn    *websocket.Conn
-	pending map[string]chan Response
-	nextID  atomic.Uint64
-	onEvent EventHandler
+	addr       string
+	mu         sync.RWMutex
+	conn       *websocket.Conn
+	pending    map[string]chan Response
+	nextID     atomic.Uint64
+	onEvent    EventHandler
+	pluginInfo *PluginInfo
 }
 
 func NewWebSocket(addr string) *WebSocket {
@@ -73,13 +82,28 @@ func (s *WebSocket) Start(ctx context.Context) error {
 	return nil
 }
 
+func (s *WebSocket) PluginInfo() *PluginInfo {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.pluginInfo == nil {
+		return nil
+	}
+	info := *s.pluginInfo
+	return &info
+}
+
 func (s *WebSocket) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	status := "disconnected"
+	resp := map[string]string{"status": "disconnected"}
 	if s.Connected() {
-		status = "connected"
+		resp["status"] = "connected"
+		if info := s.PluginInfo(); info != nil {
+			resp["plugin_version"] = info.PluginVersion
+			resp["godot_version"] = info.GodotVersion
+			resp["project_name"] = info.ProjectName
+		}
 	}
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": status})
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (s *WebSocket) handleWebSocket(w http.ResponseWriter, r *http.Request) {
@@ -97,10 +121,13 @@ func (s *WebSocket) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	s.mu.Unlock()
 
 	slog.Info("godot plugin connected", "remote", r.RemoteAddr)
+	go s.fetchPluginInfo()
+
 	defer func() {
 		s.mu.Lock()
 		if s.conn == conn {
 			s.conn = nil
+			s.pluginInfo = nil
 		}
 		s.mu.Unlock()
 		_ = conn.Close()
@@ -147,6 +174,22 @@ func (s *WebSocket) handleNotification(message []byte) {
 	if handler != nil && params.Type != "" {
 		handler(params.Type, params.Data)
 	}
+}
+
+func (s *WebSocket) fetchPluginInfo() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	raw, err := s.Call(ctx, "project.info", nil)
+	if err != nil {
+		return
+	}
+	var info PluginInfo
+	if json.Unmarshal(raw, &info) != nil {
+		return
+	}
+	s.mu.Lock()
+	s.pluginInfo = &info
+	s.mu.Unlock()
 }
 
 func (s *WebSocket) dispatchResponse(message []byte) {

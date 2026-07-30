@@ -1,57 +1,34 @@
 package skills
 
 import (
-	"context"
-
-	"github.com/godot-mcp/godot-mcp/internal/godot"
 	"github.com/godot-mcp/godot-mcp/internal/mcp"
 	"github.com/godot-mcp/godot-mcp/internal/permission"
+	"github.com/godot-mcp/godot-mcp/internal/tools/toolutil"
 )
 
 func Register(r *mcp.Registry) {
-	r.Register(mcp.ToolDefinition{
-		Name:        "skill_create_player",
-		Description: "Create a 2D player (CharacterBody2D + CollisionShape2D + Sprite2D).",
-		RPCMethod:   "skill.create_player",
-		Permission:  permission.LevelWrite,
-		Handler:     createPlayer,
-	})
-	r.Register(mcp.ToolDefinition{
-		Name:        "skill_create_scene",
-		Description: "Create and open a new basic scene.",
-		RPCMethod:   "skill.create_scene",
-		Permission:  permission.LevelWrite,
-		Handler:     createScene,
-	})
-	r.Register(mcp.ToolDefinition{
-		Name:        "skill_optimize_project",
-		Description: "Analyze project for common issues and optimization hints.",
-		RPCMethod:   "skill.optimize_project",
-		Permission:  permission.LevelRead,
-		Handler: func(ctx context.Context, client *godot.Client, _ any) (any, error) {
-			return client.Call(ctx, "skill.optimize_project", nil, nil)
-		},
-	})
-	r.Register(mcp.ToolDefinition{
-		Name:        "skill_analyze_error",
-		Description: "Analyze recent errors and suggest fixes.",
-		RPCMethod:   "skill.analyze_error",
-		Permission:  permission.LevelRead,
-		Handler: func(ctx context.Context, client *godot.Client, params any) (any, error) {
-			return client.Call(ctx, "skill.analyze_error", params, nil)
-		},
-	})
-}
+	toolutil.RegisterWithParams[toolutil.SkillCreatePlayerParams](r, toolutil.Spec{
+		Name: "skill_create_player", Description: "Create a 2D player (CharacterBody2D + collision + sprite).",
+		RPC: "skill.create_player", Level: permission.LevelWrite,
+	}, nil)
 
-func createPlayer(ctx context.Context, client *godot.Client, params any) (any, error) {
-	p, _ := params.(map[string]any)
-	if p == nil {
-		p = map[string]any{}
-	}
-	return client.CallMap(ctx, "skill.create_player", p)
-}
+	toolutil.RegisterWithParams[toolutil.SkillCreateSceneParams](r, toolutil.Spec{
+		Name: "skill_create_scene", Description: "Create and open a new basic scene.",
+		RPC: "skill.create_scene", Level: permission.LevelWrite,
+	}, nil)
 
-func createScene(ctx context.Context, client *godot.Client, params any) (any, error) {
-	p, _ := params.(map[string]any)
-	return client.CallMap(ctx, "skill.create_scene", p)
+	toolutil.RegisterNoParams(r, toolutil.Spec{
+		Name: "skill_optimize_project", Description: "Analyze project for common issues and optimization hints.",
+		RPC: "skill.optimize_project", Level: permission.LevelRead,
+	})
+
+	toolutil.RegisterWithParams[toolutil.SkillAnalyzeErrorParams](r, toolutil.Spec{
+		Name: "skill_analyze_error", Description: "Analyze recent errors and suggest fixes.",
+		RPC: "skill.analyze_error", Level: permission.LevelRead,
+	}, func(p toolutil.SkillAnalyzeErrorParams) any {
+		if p.Limit <= 0 {
+			p.Limit = 5
+		}
+		return p
+	})
 }

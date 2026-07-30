@@ -26,13 +26,28 @@ static func call(method: String, params: Variant) -> Variant:
 		"scene.save":
 			if B.edited_root() == null:
 				return B.err("no scene open")
-			var err := EditorInterface.save_scene()
-			return {"saved": err == OK}
+			var save_path := str(B.param(params, "path", ""))
+			var err: Error
+			if save_path.is_empty():
+				err = EditorInterface.save_scene()
+			else:
+				err = EditorInterface.save_scene_as(save_path, true)
+			return {"saved": err == OK, "path": save_path if not save_path.is_empty() else B.edited_root().scene_file_path}
 		"scene.create":
+			var scene_name := str(B.param(params, "name", "NewScene"))
+			var scene_path := str(B.param(params, "path", "res://%s.tscn" % scene_name))
 			var root := Node2D.new()
-			root.name = str(B.param(params, "name", "NewScene"))
-			EditorInterface.edit_node(root)
-			return {"created": true, "name": root.name}
+			root.name = scene_name
+			var packed := PackedScene.new()
+			if packed.pack(root) != OK:
+				return B.err("failed to pack scene")
+			if ResourceSaver.save(packed, scene_path) != OK:
+				return B.err("failed to save scene to %s" % scene_path)
+			var open_err := EditorInterface.open_scene_from_path(scene_path)
+			if open_err != OK:
+				return B.err("scene saved but failed to open: %s" % scene_path)
+			B.log_info("created scene %s" % scene_path)
+			return {"created": true, "path": scene_path, "name": scene_name}
 		"scene.reload":
 			var root := B.edited_root()
 			if root == null or root.scene_file_path.is_empty():

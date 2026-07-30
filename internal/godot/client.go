@@ -10,20 +10,20 @@ import (
 
 // Client is the generic Godot adapter — all tools call RPC methods through it.
 type Client struct {
-	transport *bridge.WebSocket
+	caller bridge.Caller
 }
 
-func NewClient(ws *bridge.WebSocket) *Client {
-	return &Client{transport: ws}
+func NewClient(caller bridge.Caller) *Client {
+	return &Client{caller: caller}
 }
 
 func (c *Client) Connected() bool {
-	return c.transport.Connected()
+	return c.caller.Connected()
 }
 
 // Call invokes any Godot RPC method and decodes into dest when provided.
 func (c *Client) Call(ctx context.Context, method string, params, dest any) (any, error) {
-	raw, err := c.transport.Call(ctx, method, params)
+	raw, err := c.caller.Call(ctx, method, params)
 	if err != nil {
 		return nil, err
 	}

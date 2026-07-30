@@ -30,6 +30,10 @@ func NewRegistry() *Registry { return mcp.NewRegistry() }
 
 func RegisterTool(r *Registry, def ToolDefinition) { r.Register(def) }
 
-func RegisterRPC(r *Registry, spec Spec) { toolutil.RegisterRPC(r, spec) }
+func RegisterNoParams(r *Registry, spec Spec) { toolutil.RegisterNoParams(r, spec) }
+
+func RegisterWithParams[T any](r *Registry, spec Spec, mapParams func(T) any) {
+	toolutil.RegisterWithParams(r, spec, mapParams)
+}
 
 type HandlerContext = context.Context

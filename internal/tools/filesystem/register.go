@@ -7,12 +7,27 @@ import (
 )
 
 func Register(r *mcp.Registry) {
-	toolutil.RegisterAll(r, []toolutil.Spec{
-		{Name: "file_list", Description: "List files in a directory.", RPC: "filesystem.list", Level: permission.LevelRead},
-		{Name: "file_read", Description: "Read a text file.", RPC: "filesystem.read", Level: permission.LevelRead},
-		{Name: "file_write", Description: "Write a text file.", RPC: "filesystem.write", Level: permission.LevelWrite},
-		{Name: "file_create", Description: "Create an empty file.", RPC: "filesystem.create", Level: permission.LevelWrite},
-		{Name: "file_delete", Description: "Delete a file.", RPC: "filesystem.delete", Level: permission.LevelDestructive},
-		{Name: "folder_create", Description: "Create a folder.", RPC: "filesystem.mkdir", Level: permission.LevelWrite},
+	toolutil.RegisterWithParams[toolutil.OptionalPathParams](r, toolutil.Spec{
+		Name: "file_list", Description: "List files in a directory.", RPC: "filesystem.list", Level: permission.LevelRead,
+	}, func(p toolutil.OptionalPathParams) any {
+		if p.Path == "" {
+			p.Path = "res://"
+		}
+		return map[string]string{"path": p.Path}
 	})
+	toolutil.RegisterWithParams[toolutil.PathParams](r, toolutil.Spec{
+		Name: "file_read", Description: "Read a text file.", RPC: "filesystem.read", Level: permission.LevelRead,
+	}, nil)
+	toolutil.RegisterWithParams[toolutil.FileWriteParams](r, toolutil.Spec{
+		Name: "file_write", Description: "Write a text file.", RPC: "filesystem.write", Level: permission.LevelWrite,
+	}, nil)
+	toolutil.RegisterWithParams[toolutil.PathParams](r, toolutil.Spec{
+		Name: "file_create", Description: "Create an empty file.", RPC: "filesystem.create", Level: permission.LevelWrite,
+	}, nil)
+	toolutil.RegisterWithParams[toolutil.PathParams](r, toolutil.Spec{
+		Name: "file_delete", Description: "Delete a file.", RPC: "filesystem.delete", Level: permission.LevelDestructive,
+	}, nil)
+	toolutil.RegisterWithParams[toolutil.PathParams](r, toolutil.Spec{
+		Name: "folder_create", Description: "Create a folder.", RPC: "filesystem.mkdir", Level: permission.LevelWrite,
+	}, nil)
 }

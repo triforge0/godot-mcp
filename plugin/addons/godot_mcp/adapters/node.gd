@@ -14,13 +14,20 @@ static func call(method: String, params: Variant) -> Variant:
 			var root := B.edited_root()
 			return {"nodes": _tree(root) if root else []}
 		"node.create":
-			var parent := B.find_node(str(B.param(params, "parent_path", "")))
+			var parent_path := str(B.param(params, "parent_path", ""))
 			var type_name := str(B.param(params, "type", "Node"))
 			var node_name := str(B.param(params, "name", "Node"))
+			var parent: Node = null
+			if parent_path.is_empty():
+				parent = B.edited_root()
+			else:
+				parent = B.find_node(parent_path)
 			if parent == null:
-				return B.err("parent not found")
+				return B.err("parent not found — open a scene or provide parent_path")
+			if node_name.is_empty():
+				return B.err("name is required")
 			if not ClassDB.class_exists(type_name):
-				return B.err("unknown class")
+				return B.err("unknown class: %s" % type_name)
 			var node: Node = ClassDB.instantiate(type_name)
 			node.name = node_name
 			parent.add_child(node)
