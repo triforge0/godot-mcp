@@ -115,6 +115,53 @@ The plugin never implements business logic. It translates JSON-RPC calls into Go
 
 ---
 
+## Implementation Architecture
+
+The v0.1 codebase follows a layered design optimized for community contributions:
+
+```text
+Tool (MCP name)
+    ↓
+Permission Gate
+    ↓
+Handler (internal/tools/<category>/)
+    ↓
+Godot Client (internal/godot/)
+    ↓
+Bridge RPC (internal/bridge/rpc/)
+    ↓
+WebSocket Transport (internal/bridge/websocket/)
+    ↓
+Godot Plugin
+```
+
+### Key packages
+
+| Package | Role |
+|---------|------|
+| `internal/mcp/` | MCP server, tool registry, dispatcher |
+| `internal/tools/` | One package per tool category; each tool registers via `Registry` |
+| `internal/permissions/` | Permission gate (Tool → Permission → RPC) |
+| `internal/events/` | Event bus for future MCP notifications |
+| `internal/domain/` | Typed domain models (`SceneNode`, `PingResult`, …) |
+| `internal/godot/` | Godot client with domain services (`Scene`, `Run`) |
+| `internal/bridge/` | Transport layer — RPC types + WebSocket server |
+
+Tool names and RPC methods are **decoupled** via `ToolDefinition`:
+
+```go
+registry.Register(mcp.ToolDefinition{
+    Name:       "scene_tree",   // MCP tool name
+    RPCMethod:  "scene.tree",   // Godot plugin RPC method
+    Permission: permissions.LevelRead,
+    Handler:    treeHandler,
+})
+```
+
+Contributors add a tool by creating a package under `internal/tools/` and calling `Register()` in `internal/tools/register.go`.
+
+---
+
 ## Components
 
 ### godot-mcp-core
@@ -432,53 +479,40 @@ godot-mcp/
 ├── cmd/
 │   └── godot-mcp/              # CLI entrypoint
 ├── internal/
-│   ├── mcp/                    # MCP protocol
-│   ├── transport/              # stdio, HTTP, WebSocket
-│   ├── dispatcher/
-│   ├── session/
-│   ├── permissions/
-│   └── logging/
-├── tools/
-│   ├── editor/
-│   ├── scene/
-│   ├── node/
-│   ├── resource/
-│   ├── runtime/
-│   ├── debug/
-│   └── script/
+│   ├── mcp/                    # MCP server, registry, dispatcher
+│   ├── bridge/
+│   │   ├── rpc/                # JSON-RPC types and Caller interface
+│   │   └── websocket/          # WebSocket transport server
+│   ├── godot/                  # Godot client (scene, runtime services)
+│   ├── domain/                 # Domain models
+│   ├── tools/                  # MCP tool packages (ping, scene, runtime, …)
+│   ├── permissions/            # Permission gate
+│   ├── events/                 # Event bus
+│   ├── config/
+│   └── version/
 ├── plugin/
-│   └── addons/godot_mcp/
-├── sdk/
+│   └── addons/godot_mcp/       # Godot editor addon (thin bridge)
 ├── spec/
-│   ├── tools/                  # Tool JSON Schemas
+│   ├── tools/                  # MCP tool JSON Schemas
+│   ├── rpc/                    # Godot plugin RPC method specs
 │   └── rfc/                    # Design proposals
 ├── examples/
-│   ├── platformer-2d/
-│   ├── demo-3d/
-│   └── ui-app/
+├── scripts/
 ├── docs/
-│   └── DESIGN.md               # This file
 └── website/
 ```
-
-Community resources (planned):
-
-- `CONTRIBUTING.md` — contribution guide
-- `LICENSE` — MIT
-- RFC process for significant changes
-- Example projects for quick integration testing
 
 ---
 
 ## Roadmap
 
-| Version | Deliverables |
-|---------|--------------|
-| **v0.1** | `ping`, `scene_tree`, `open_scene`, `save_scene`, `run_project` |
-| **v0.2** | Node CRUD, resource tools, `take_screenshot` |
-| **v0.3** | Runtime control, debug tools, console access, input simulation |
-| **v0.4** | Event streaming, log streaming, inspector integration |
-| **v1.0** | Extension SDK, stable API, versioning policy, marketplace |
+| Version | Focus | Status |
+|---------|-------|--------|
+| **v0.1** | Connectivity | ✅ Shipped |
+| **v0.2** | Editing | ✅ Shipped |
+| **v0.3** | Runtime & Debug | ✅ Shipped |
+| **v0.4** | AI Features | ✅ Shipped |
+| **v1.0** | Ecosystem | ✅ SDK, semver, marketplace, CI |
 
 ### Differentiators at v1.0
 

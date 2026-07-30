@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "open_scene",
+  "description": "Open a scene in the Godot editor.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "res:// path to the scene file"
+      }
+    },
+    "required": ["path"],
+    "additionalProperties": false
+  }
+}

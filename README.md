@@ -4,7 +4,7 @@
 
 Godot MCP connects any AI assistant — Claude, Cursor, ChatGPT, Gemini, Copilot, and others — to the Godot editor and runtime through a single, community-maintained MCP server.
 
-> **Status:** Early design phase. This repository defines the project vision and architecture. Implementation has not started yet.
+> **Status:** v1.0.0 — 64 tools, 12 families, generic object model, event streaming, extension SDK.
 
 ---
 
@@ -159,30 +159,23 @@ Expose named tools with clear inputs and outputs. AI clients call `save_scene()`
 
 ```text
 godot-mcp/
-├── cmd/
-│   └── godot-mcp/          # CLI entrypoint
+├── cmd/godot-mcp/
 ├── internal/
-│   ├── mcp/                # MCP protocol handler
-│   ├── transport/          # WebSocket, stdio
-│   ├── dispatcher/         # Tool routing
-│   ├── session/            # Client sessions
-│   ├── permissions/        # Permission gates
-│   └── logging/
-├── tools/
-│   ├── editor/
-│   ├── scene/
-│   ├── node/
-│   ├── resource/
-│   ├── runtime/
-│   ├── debug/
-│   └── script/
-├── plugin/
-│   └── addons/godot_mcp/   # Godot addon
-├── sdk/
-├── spec/                   # Tool & protocol specs
-├── examples/
-├── docs/
-└── website/
+│   ├── mcp/           # server, registry, protocol, dispatcher
+│   ├── bridge/        # jsonrpc.go, websocket.go
+│   ├── tools/         # 12 families (project, scene, node, …)
+│   ├── permission/
+│   ├── events/
+│   ├── godot/         # generic Client.Call(RPC)
+│   ├── domain/        # GodotObject model
+│   └── config/
+├── plugin/addons/godot_mcp/
+│   ├── bridge.gd
+│   ├── rpc_router.gd
+│   └── adapters/      # 12 thin Godot API adapters
+├── spec/tools/
+├── sdk/go/godotmcp/
+└── docs/
 ```
 
 Long term, core MCP infrastructure may be extracted into a reusable `mcp-core` package for other creative tools (Blender, Tiled, etc.).
@@ -297,13 +290,13 @@ All business logic stays in the Go server; the plugin is a bridge only.
 
 ## Roadmap
 
-| Version | Scope |
-|---------|-------|
-| **v0.1** | `ping`, `scene_tree`, `open_scene`, `save_scene`, `run_project` |
-| **v0.2** | Node CRUD, resources, screenshot |
-| **v0.3** | Runtime control, debug tools, console, input simulation |
-| **v0.4** | Events, streaming, inspector integration |
-| **v1.0** | Extension SDK, stable API, versioning, marketplace |
+| Version | Focus | Status |
+|---------|-------|--------|
+| **v0.1** | Connectivity | ✅ `ping`, `scene_tree`, `open_scene`, `save_scene`, `run_project` |
+| **v0.2** | Editing | ✅ Node CRUD, `set_property`, `get_property` |
+| **v0.3** | Runtime | ✅ Screenshot, logs, FPS, errors, inspector |
+| **v0.4** | AI Features | ✅ Events, playtesting, input simulation, asset search |
+| **v1.0** | Ecosystem | ✅ SDK, semver, marketplace, CI (Win/macOS/Linux) |
 
 ---
 
@@ -311,6 +304,8 @@ All business logic stays in the Go server; the plugin is a bridge only.
 
 | Resource | Description |
 |----------|-------------|
+| [docs/TOOLS.md](docs/TOOLS.md) | Complete v1.0 tool reference |
+| [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) | Build, install plugin, configure AI client |
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, protocol, permissions, and design decisions |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute code, tools, and docs |
 | [docs.godot-mcp.org](https://docs.godot-mcp.org) | Public docs site (Getting Started, Tool Reference, SDK, Examples) |

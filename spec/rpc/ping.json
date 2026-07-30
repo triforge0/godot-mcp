@@ -1,0 +1,14 @@
+{
+  "method": "ping",
+  "description": "Return plugin and Godot version info.",
+  "params": {},
+  "result": {
+    "type": "object",
+    "properties": {
+      "plugin": { "type": "string" },
+      "plugin_version": { "type": "string" },
+      "godot_version": { "type": "string" },
+      "project_name": { "type": "string" }
+    }
+  }
+}

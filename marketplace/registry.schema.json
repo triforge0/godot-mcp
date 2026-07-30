@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://godot-mcp.org/marketplace/registry.schema.json",
+  "title": "Godot MCP Marketplace Registry",
+  "type": "object",
+  "required": ["extensions"],
+  "properties": {
+    "extensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "author", "description", "repository"],
+        "properties": {
+          "name": { "type": "string" },
+          "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "repository": { "type": "string", "format": "uri" },
+          "tools": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "categories": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

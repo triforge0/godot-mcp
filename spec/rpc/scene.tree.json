@@ -1,0 +1,26 @@
+{
+  "method": "scene.tree",
+  "description": "Return the scene tree of the currently edited scene.",
+  "params": {},
+  "result": {
+    "type": "object",
+    "properties": {
+      "scene": { "type": "string" },
+      "tree": { "$ref": "#/definitions/SceneNode" }
+    }
+  },
+  "definitions": {
+    "SceneNode": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "path": { "type": "string" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SceneNode" }
+        }
+      }
+    }
+  }
+}

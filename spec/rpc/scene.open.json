@@ -1,0 +1,11 @@
+{
+  "method": "scene.open",
+  "description": "Open a scene in the Godot editor.",
+  "params": {
+    "type": "object",
+    "required": ["path"],
+    "properties": {
+      "path": { "type": "string", "description": "res:// path to the scene file" }
+    }
+  }
+}

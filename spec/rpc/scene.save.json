@@ -1,0 +1,10 @@
+{
+  "method": "scene.save",
+  "description": "Save the currently open scene.",
+  "params": {
+    "type": "object",
+    "properties": {
+      "path": { "type": "string", "description": "Optional override path" }
+    }
+  }
+}

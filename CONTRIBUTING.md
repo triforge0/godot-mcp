@@ -130,30 +130,47 @@ See [docs/DESIGN.md](docs/DESIGN.md) for the current architecture and design rat
 
 ## Adding Tools
 
-Tools are the public contract between AI clients and Godot. Follow these rules:
+Tools are the public contract between AI clients and Godot. To add a new tool:
 
-1. **High-level, not raw API** — expose intent (`save_scene`), not Godot internals
-2. **Stable schemas** — define inputs/outputs in `spec/tools/<category>/<tool>.json`
-3. **Idempotent when possible** — safe to retry where it makes sense
-4. **Permission-aware** — mark destructive or sensitive tools in the permission registry
-5. **Plugin stays thin** — implement orchestration in the Go server; plugin executes Godot calls
+1. **Define domain types** in `internal/domain/` (if needed)
+2. **Add Godot client method** in `internal/godot/` (calls RPC via bridge)
+3. **Create tool package** under `internal/tools/<category>/`
+4. **Register** in `internal/tools/register.go`
+5. **Add specs** in `spec/tools/` and `spec/rpc/`
+6. **Implement RPC handler** in the Godot plugin (`plugin/addons/godot_mcp/bridge.gd`)
 
-### Tool layout
+### Example: adding a tool
 
 ```text
-tools/
-└── scene/
-    └── save_scene.go      # Server-side handler
-
-spec/
-└── tools/
-    └── scene/
-        └── save_scene.json # JSON Schema for MCP tool definition
-
-plugin/addons/godot_mcp/
-└── handlers/
-    └── scene.gd            # Godot-side execution only
+internal/tools/scene/tree.go     # Handler + Registry entry
+internal/godot/scene.go          # SceneService.Tree()
+internal/domain/scene.go         # SceneTree, SceneNode
+spec/tools/scene_tree.json       # MCP tool schema
+spec/rpc/scene.tree.json         # Plugin RPC schema
+plugin/.../bridge.gd             # scene.tree RPC handler
 ```
+
+### Tool definition
+
+```go
+registry.Register(mcp.ToolDefinition{
+    Name:        "scene_tree",      // MCP tool name (AI-facing)
+    RPCMethod:   "scene.tree",      // Godot plugin RPC method
+    Description: "...",
+    Permission:  permissions.LevelRead,
+    Handler: func(ctx context.Context, client *godot.Client, params any) (any, error) {
+        return client.Scene.Tree(ctx)
+    },
+})
+```
+
+### Rules
+
+1. **High-level, not raw API** — expose intent (`save_scene`), not Godot internals
+2. **Typed domain models** — use `internal/domain/`, not `map[string]any`
+3. **Permission-aware** — set the correct `permissions.Level`
+4. **Plugin stays thin** — business logic in Go; plugin executes Godot API calls only
+5. **Decouple names** — MCP tool name ≠ RPC method name; linked via `ToolDefinition`
 
 ---
 

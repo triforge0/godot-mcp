@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "save_scene",
+  "description": "Save the currently open scene in the Godot editor.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Optional override path; defaults to the scene's current path"
+      }
+    },
+    "additionalProperties": false
+  }
+}

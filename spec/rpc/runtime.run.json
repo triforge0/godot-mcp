@@ -1,0 +1,5 @@
+{
+  "method": "runtime.run",
+  "description": "Run the Godot project in play mode.",
+  "params": {}
+}
