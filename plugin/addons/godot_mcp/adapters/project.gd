@@ -12,6 +12,8 @@ static func call(method: String, params: Variant) -> Variant:
 		"project.info":
 			var v := Engine.get_version_info()
 			return {
+				"plugin": "godot_mcp",
+				"plugin_version": "1.0.0",
 				"project_name": ProjectSettings.get_setting("application/config/name", ""),
 				"godot_version": "%d.%d.%d" % [v.major, v.minor, v.patch],
 				"main_scene": ProjectSettings.get_setting("application/run/main_scene", ""),

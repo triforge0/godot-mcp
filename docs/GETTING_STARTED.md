@@ -20,6 +20,16 @@ The binary is written to `bin/godot-mcp`.
 
 ## 2. Install the Godot plugin
 
+**Option A — use the demo project**
+
+```bash
+# Open examples/demo/ in Godot 4.3+
+```
+
+The demo includes a symlink to the plugin. See [examples/demo/README.md](../examples/demo/README.md).
+
+**Option B — add to your own project**
+
 Copy or symlink the addon into your Godot project:
 
 ```bash
@@ -120,3 +130,5 @@ Ask your AI assistant, for example:
 |----------|---------|-------------|
 | `GODOT_MCP_BRIDGE_ADDR` | `127.0.0.1:6505` | WebSocket listen address (server side) |
 | `GODOT_MCP_BRIDGE_URL` | `ws://127.0.0.1:6505/ws` | WebSocket URL (Godot plugin side) |
+| `GODOT_MCP_ALLOW_DESTRUCTIVE` | (unset) | Skip destructive permission dialogs when `1` |
+| `GODOT_MCP_ALLOW_SCRIPT_EXEC` | (unset) | Skip `script_execute` permission dialog when `1` |

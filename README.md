@@ -233,19 +233,19 @@ The server pushes events to connected AI clients — no polling required.
 
 ## Permissions
 
-Destructive or sensitive operations require explicit user approval, similar to VS Code extension permission prompts.
+Destructive operations and `script_execute` show a native Godot editor dialog before running:
 
 ```text
-AI requests: delete_scene
+AI requests: node_delete
         ↓
-┌─────────────────────────┐
-│  Allow this action?     │
-│  [ Once ] [ Always ]    │
-│  [ Never ]  [ Cancel ]  │
-└─────────────────────────┘
+┌──────────────────────────────┐
+│  Godot MCP — Permission      │
+│  Allow Once | Allow Always   │
+│  Deny                        │
+└──────────────────────────────┘
 ```
 
-Applies to actions such as deleting scenes, overwriting resources, and running arbitrary scripts.
+"Allow Always" is cached for the current editor session. Set `GODOT_MCP_ALLOW_DESTRUCTIVE=1` or `GODOT_MCP_ALLOW_SCRIPT_EXEC=1` to skip dialogs during development.
 
 ---
 
@@ -316,7 +316,7 @@ All business logic stays in the Go server; the plugin is a bridge only.
 
 Contributions are welcome — see **[CONTRIBUTING.md](CONTRIBUTING.md)** for setup, PR guidelines, and the RFC process for significant design changes.
 
-Example projects in `examples/` will help newcomers test integrations quickly.
+Example project: [examples/demo/](examples/demo/) — open in Godot 4.3+ to test integrations quickly.
 
 ---
 

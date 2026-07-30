@@ -1,11 +1,9 @@
 # Examples
 
-Example Godot projects for testing Godot MCP will live here.
+| Project | Description |
+|---------|-------------|
+| [demo/](demo/) | Minimal Godot 4 project with the MCP plugin pre-linked |
 
-Suggested examples (contributions welcome):
+Open `examples/demo/` in Godot 4.3+, enable the **Godot MCP** plugin, and follow [GETTING_STARTED.md](../docs/GETTING_STARTED.md).
 
-- `platformer-2d/` — 2D platformer for node editing and playtesting
-- `demo-3d/` — 3D scene for screenshot and inspector tools
-- `ui-app/` — Control-based UI for property editing
-
-See [GETTING_STARTED.md](../docs/GETTING_STARTED.md) to connect any existing project.
+Contributions welcome for additional examples (2D platformer, 3D scene, UI app).

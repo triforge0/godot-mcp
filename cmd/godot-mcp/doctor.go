@@ -51,9 +51,11 @@ func newDoctorCmd() *cobra.Command {
 				fmt.Println("  plugin: not connected — open Godot and enable the Godot MCP addon")
 			}
 
-			fmt.Println("\nPermissions (dev overrides):")
-			fmt.Println("  GODOT_MCP_ALLOW_DESTRUCTIVE=1  — delete_node, file_delete, resource_delete")
-			fmt.Println("  GODOT_MCP_ALLOW_SCRIPT_EXEC=1  — script_execute")
+			fmt.Println("\nPermissions:")
+			fmt.Println("  Destructive tools and script_execute prompt in the Godot editor.")
+			fmt.Println("  Dev bypass (skip dialogs):")
+			fmt.Println("    GODOT_MCP_ALLOW_DESTRUCTIVE=1")
+			fmt.Println("    GODOT_MCP_ALLOW_SCRIPT_EXEC=1")
 			return nil
 		},
 	}

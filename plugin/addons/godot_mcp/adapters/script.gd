@@ -49,5 +49,16 @@ static func call(method: String, params: Variant) -> Variant:
 			node.set_script(null)
 			return {"detached": true}
 		"script.execute":
-			return B.err("script.execute disabled by default — enable GODOT_MCP_ALLOW_SCRIPT_EXEC")
+			var source := str(B.param(params, "source", ""))
+			if source.is_empty():
+				return B.err("source is required")
+			var expr := Expression.new()
+			var parse_err := expr.parse(source)
+			if parse_err != OK:
+				return B.err("parse error: %s" % expr.get_error_text())
+			var root := B.edited_root()
+			var result = expr.execute([], root, false)
+			if expr.has_execute_failed():
+				return B.err(expr.get_error_text())
+			return {"result": result, "executed": true}
 	return B.err("unsupported: %s" % method)

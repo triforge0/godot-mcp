@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/godot-mcp/godot-mcp/internal/bridge"
+	"github.com/godot-mcp/godot-mcp/internal/permission"
 )
 
 // Client is the generic Godot adapter — all tools call RPC methods through it.
@@ -41,6 +42,13 @@ func (c *Client) Call(ctx context.Context, method string, params, dest any) (any
 		return string(raw), nil
 	}
 	return generic, nil
+}
+
+// RequestPermission asks the Godot plugin to show a permission dialog.
+func (c *Client) RequestPermission(ctx context.Context, req permission.Request) (permission.Response, error) {
+	var resp permission.Response
+	_, err := c.Call(ctx, "permission.request", req, &resp)
+	return resp, err
 }
 
 // CallMap is a convenience for untyped RPC results.

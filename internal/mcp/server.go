@@ -28,7 +28,7 @@ func New(opts Options) *Server {
 		bus = events.NewBus()
 	}
 
-	gate := permission.NewGate()
+	gate := permission.NewGate(opts.GodotClient)
 	dispatcher := NewDispatcher(opts.GodotClient, gate, bus)
 
 	mcpServer := mcpsdk.NewServer(&mcpsdk.Implementation{

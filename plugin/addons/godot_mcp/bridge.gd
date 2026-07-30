@@ -2,6 +2,7 @@
 extends Node
 
 const Router = preload("res://addons/godot_mcp/rpc_router.gd")
+const PermissionManager = preload("res://addons/godot_mcp/permission_manager.gd")
 
 const DEFAULT_URL := "ws://127.0.0.1:6505/ws"
 const RECONNECT_SECONDS := 3.0
@@ -63,7 +64,22 @@ func _handle_message(raw: String) -> void:
 	var params: Variant = request.get("params", {})
 	if params == null:
 		params = {}
+	if method == "permission.request":
+		_handle_permission_request(id, params)
+		return
 	var result: Variant = Router.dispatch(method, params)
+	if typeof(result) == TYPE_DICTIONARY and (result as Dictionary).has("error"):
+		_send_error(id, -32000, str((result as Dictionary)["error"]))
+	else:
+		_send_json({"jsonrpc": "2.0", "id": id, "result": result})
+
+
+func _handle_permission_request(id: String, params: Variant) -> void:
+	_handle_permission_request_async(id, params)
+
+
+func _handle_permission_request_async(id: String, params: Variant) -> void:
+	var result: Variant = await PermissionManager.request(params)
 	if typeof(result) == TYPE_DICTIONARY and (result as Dictionary).has("error"):
 		_send_error(id, -32000, str((result as Dictionary)["error"]))
 	else:

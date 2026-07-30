@@ -155,13 +155,20 @@ Flow: **Godot → WebSocket event → EventBus → MCP notification → AI**
 
 ## Permissions
 
-| Level | Examples |
-|-------|----------|
-| read | list, inspect, logs |
-| write | create, set_property |
-| execute | runtime.run, script.execute |
-| destructive | delete_node, file_delete |
+| Level | Behavior | Examples |
+|-------|----------|----------|
+| read | Always allowed | list, inspect, logs |
+| write | Always allowed | create, set_property |
+| execute | Prompt for `script_execute` | script.execute |
+| destructive | Godot editor dialog | delete_node, file_delete |
 
-Dev overrides:
+When a destructive tool or `script_execute` runs, the Godot plugin shows a dialog:
+
+**Allow Once** · **Allow Always** · **Deny**
+
+"Allow Always" is remembered for the current editor session.
+
+Dev bypass (skip dialogs):
+
 - `GODOT_MCP_ALLOW_DESTRUCTIVE=1`
 - `GODOT_MCP_ALLOW_SCRIPT_EXEC=1`
