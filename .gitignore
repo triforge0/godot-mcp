@@ -20,5 +20,6 @@ go.work.sum
 .godot/
 *.import
 export_presets.cfg
+.local/
 .claude
 CLAUDE.md

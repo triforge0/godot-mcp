@@ -1,4 +1,4 @@
-.PHONY: build run doctor version test
+.PHONY: build run doctor version test test-integration
 
 BINARY := bin/godot-mcp
 
@@ -16,3 +16,6 @@ version: build
 
 test:
 	go test ./...
+
+test-integration:
+	go test -tags=integration -timeout 10m ./internal/integration/...

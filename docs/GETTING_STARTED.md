@@ -10,8 +10,17 @@ This guide walks through running **godot-mcp v0.1** locally.
 
 ## 1. Build the MCP server
 
+**Homebrew (macOS/Linux):**
+
 ```bash
-git clone https://github.com/your-org/godot-mcp.git
+brew tap triforge0/godot-mcp https://github.com/triforge0/godot-mcp
+brew install godot-mcp
+```
+
+**From source:**
+
+```bash
+git clone https://github.com/triforge0/godot-mcp.git
 cd godot-mcp
 make build
 ```
@@ -132,3 +141,7 @@ Ask your AI assistant, for example:
 | `GODOT_MCP_BRIDGE_URL` | `ws://127.0.0.1:6505/ws` | WebSocket URL (Godot plugin side) |
 | `GODOT_MCP_ALLOW_DESTRUCTIVE` | (unset) | Skip destructive permission dialogs when `1` |
 | `GODOT_MCP_ALLOW_SCRIPT_EXEC` | (unset) | Skip `script_execute` permission dialog when `1` |
+
+## Integration tests
+
+See [TESTING.md](TESTING.md) for running tests against a real Godot editor.

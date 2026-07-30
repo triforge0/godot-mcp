@@ -70,9 +70,16 @@ AI can use Godot
 
 > Available after v0.1 is released.
 
+See [docs/HOMEBREW.md](docs/HOMEBREW.md) for Homebrew installation details.
+
 ```bash
-# Install the CLI
+# Install the CLI (Homebrew)
+brew tap triforge0/godot-mcp https://github.com/triforge0/godot-mcp
 brew install godot-mcp
+
+# Or build from source
+git clone https://github.com/triforge0/godot-mcp.git
+cd godot-mcp && make build
 
 # Start the MCP server
 godot-mcp start
@@ -306,6 +313,8 @@ All business logic stays in the Go server; the plugin is a bridge only.
 |----------|-------------|
 | [docs/TOOLS.md](docs/TOOLS.md) | Complete v1.0 tool reference |
 | [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) | Build, install plugin, configure AI client |
+| [docs/HOMEBREW.md](docs/HOMEBREW.md) | Homebrew tap and plugin install path |
+| [docs/TESTING.md](docs/TESTING.md) | Unit, mock e2e, and real Godot integration tests |
 | [docs/DESIGN.md](docs/DESIGN.md) | Architecture, protocol, permissions, and design decisions |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute code, tools, and docs |
 | [docs.godot-mcp.org](https://docs.godot-mcp.org) | Public docs site (Getting Started, Tool Reference, SDK, Examples) |

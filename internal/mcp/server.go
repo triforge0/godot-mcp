@@ -46,6 +46,8 @@ func New(opts Options) *Server {
 
 func (s *Server) EventBus() *events.Bus { return s.bus }
 
+func (s *Server) MCPServer() *mcpsdk.Server { return s.mcp }
+
 func (s *Server) Run(ctx context.Context) error {
 	slog.Info("mcp server starting", "transport", "stdio")
 	return s.mcp.Run(ctx, &mcpsdk.StdioTransport{})
