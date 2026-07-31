@@ -19,6 +19,7 @@ go.work.sum
 # Godot
 .godot/
 *.import
+*.uid
 export_presets.cfg
 .local/
 .claude

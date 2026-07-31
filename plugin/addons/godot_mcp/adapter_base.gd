@@ -5,6 +5,19 @@ const MAX_LOGS := 300
 
 static var logs: Array = []
 static var errors: Array = []
+static var _undo_redo: EditorUndoRedoManager
+
+
+static func set_undo_redo(ur: EditorUndoRedoManager) -> void:
+	_undo_redo = ur
+
+
+# EditorInterface has no direct undo()/redo(); the manager exposes per-object
+# history, so we operate on the shared GLOBAL_HISTORY like the Edit menu does.
+static func global_undo_redo() -> UndoRedo:
+	if _undo_redo == null:
+		return null
+	return _undo_redo.get_history_undo_redo(EditorUndoRedoManager.GLOBAL_HISTORY)
 
 
 static func log_info(message: String) -> void:

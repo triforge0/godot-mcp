@@ -2,6 +2,7 @@
 extends EditorPlugin
 
 const BridgeScript = preload("res://addons/godot_mcp/bridge.gd")
+const AdapterBase = preload("res://addons/godot_mcp/adapter_base.gd")
 
 var _bridge: Node
 
@@ -10,6 +11,7 @@ func _enter_tree() -> void:
 	_bridge = BridgeScript.new()
 	add_child(_bridge)
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
+	AdapterBase.set_undo_redo(get_undo_redo())
 
 
 func _exit_tree() -> void:

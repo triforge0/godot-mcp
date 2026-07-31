@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("scene.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"scene.list":
 			return {"scenes": _list_scenes("res://")}
@@ -21,18 +21,19 @@ static func call(method: String, params: Variant) -> Variant:
 			var path := str(B.param(params, "path", ""))
 			if path.is_empty():
 				return B.err("path required")
-			var err := EditorInterface.open_scene_from_path(path)
-			return {"opened": err == OK, "path": path} if err == OK else B.err("open failed")
+			# open_scene_from_path() returns void; there's no direct success signal.
+			EditorInterface.open_scene_from_path(path)
+			return {"opened": true, "path": path}
 		"scene.save":
 			if B.edited_root() == null:
 				return B.err("no scene open")
 			var save_path := str(B.param(params, "path", ""))
-			var err: Error
 			if save_path.is_empty():
-				err = EditorInterface.save_scene()
-			else:
-				err = EditorInterface.save_scene_as(save_path, true)
-			return {"saved": err == OK, "path": save_path if not save_path.is_empty() else B.edited_root().scene_file_path}
+				var err := EditorInterface.save_scene()
+				return {"saved": err == OK, "path": B.edited_root().scene_file_path}
+			# save_scene_as() returns void; there's no direct success signal.
+			EditorInterface.save_scene_as(save_path, true)
+			return {"saved": true, "path": save_path}
 		"scene.create":
 			var scene_name := str(B.param(params, "name", "NewScene"))
 			var scene_path := str(B.param(params, "path", "res://%s.tscn" % scene_name))
@@ -43,9 +44,7 @@ static func call(method: String, params: Variant) -> Variant:
 				return B.err("failed to pack scene")
 			if ResourceSaver.save(packed, scene_path) != OK:
 				return B.err("failed to save scene to %s" % scene_path)
-			var open_err := EditorInterface.open_scene_from_path(scene_path)
-			if open_err != OK:
-				return B.err("scene saved but failed to open: %s" % scene_path)
+			EditorInterface.open_scene_from_path(scene_path)
 			B.log_info("created scene %s" % scene_path)
 			return {"created": true, "path": scene_path, "name": scene_name}
 		"scene.reload":
@@ -55,8 +54,8 @@ static func call(method: String, params: Variant) -> Variant:
 			EditorInterface.open_scene_from_path(root.scene_file_path)
 			return {"reloaded": true}
 		"scene.close":
-			EditorInterface.close_scene()
-			return {"closed": true}
+			# EditorInterface has no public API to close a scene tab in this Godot version.
+			return B.err("scene.close is not supported by this Godot version's EditorInterface API")
 	return B.err("unsupported: %s" % method)
 
 

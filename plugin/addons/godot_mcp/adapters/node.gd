@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("node.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"node.list":
 			var root := B.edited_root()

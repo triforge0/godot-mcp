@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("filesystem.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"filesystem.list":
 			var path := str(B.param(params, "path", "res://"))

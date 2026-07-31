@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("editor.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"editor.selection":
 			var nodes := EditorInterface.get_selection().get_selected_nodes()
@@ -25,12 +25,12 @@ static func call(method: String, params: Variant) -> Variant:
 			EditorInterface.edit_node(node)
 			return {"focused": str(node.get_path())}
 		"editor.undo":
-			var ur := EditorInterface.get_editor_undo_redo()
+			var ur := B.global_undo_redo()
 			if ur:
 				ur.undo()
 			return {"undo": true}
 		"editor.redo":
-			var ur := EditorInterface.get_editor_undo_redo()
+			var ur := B.global_undo_redo()
 			if ur:
 				ur.redo()
 			return {"redo": true}

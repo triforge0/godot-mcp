@@ -9,17 +9,17 @@ static func handles(method: String) -> bool:
 	return method.begins_with("skill.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"skill.create_player":
 			var parent_path := str(B.param(params, "parent_path", ""))
 			if parent_path.is_empty():
 				var root := B.edited_root()
 				parent_path = str(root.get_path()) if root else ""
-			NodeAdapter.call("node.create", {"parent_path": parent_path, "type": "CharacterBody2D", "name": "Player"})
+			NodeAdapter.dispatch("node.create", {"parent_path": parent_path, "type": "CharacterBody2D", "name": "Player"})
 			var player_path := parent_path.path_join("Player") if not parent_path.is_empty() else "Player"
-			NodeAdapter.call("node.create", {"parent_path": player_path, "type": "CollisionShape2D", "name": "Collision"})
-			NodeAdapter.call("node.create", {"parent_path": player_path, "type": "Sprite2D", "name": "Sprite"})
+			NodeAdapter.dispatch("node.create", {"parent_path": player_path, "type": "CollisionShape2D", "name": "Collision"})
+			NodeAdapter.dispatch("node.create", {"parent_path": player_path, "type": "Sprite2D", "name": "Sprite"})
 			return {"created": true, "player_path": player_path}
 		"skill.create_scene":
 			var name := str(B.param(params, "name", "NewScene"))

@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method in ["object.inspect", "class.inspect", "property.list", "method.list"]
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"object.inspect":
 			var node := B.find_node(str(B.param(params, "path", "")))

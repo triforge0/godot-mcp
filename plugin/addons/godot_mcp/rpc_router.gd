@@ -24,5 +24,5 @@ static func dispatch(method: String, params: Variant) -> Variant:
 	]
 	for adapter in adapters:
 		if adapter.handles(method):
-			return adapter.call(method, params)
+			return adapter.dispatch(method, params)
 	return Base.err("unknown method: %s" % method)

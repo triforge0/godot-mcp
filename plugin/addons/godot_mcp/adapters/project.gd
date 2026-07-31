@@ -7,7 +7,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("project.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"project.info":
 			var v := Engine.get_version_info()

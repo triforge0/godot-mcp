@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("screenshot.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"screenshot.capture", "screenshot.viewport":
 			var img := _capture()
@@ -25,16 +25,12 @@ static func call(method: String, params: Variant) -> Variant:
 
 
 static func _capture() -> Image:
-	if EditorInterface.is_playing_scene():
-		var playing := EditorInterface.get_playing_scene()
-		if playing:
-			var tex := playing.get_viewport().get_texture()
-			if tex:
-				return tex.get_image()
+	# get_playing_scene() returns the scene's res:// path (a String), not a node —
+	# the running game is a separate process, so its viewport isn't reachable here.
 	for getter in [EditorInterface.get_editor_viewport_2d, EditorInterface.get_editor_viewport_3d]:
-		var vp = getter.call()
+		var vp: SubViewport = getter.call()
 		if vp:
-			var tex := vp.get_texture()
+			var tex: ViewportTexture = vp.get_texture()
 			if tex:
 				return tex.get_image()
 	return null

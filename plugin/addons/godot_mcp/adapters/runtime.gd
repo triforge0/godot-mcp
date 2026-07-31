@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("runtime.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"runtime.run":
 			EditorInterface.play_main_scene()
@@ -16,14 +16,9 @@ static func call(method: String, params: Variant) -> Variant:
 		"runtime.stop":
 			EditorInterface.stop_playing_scene()
 			return {"stopped": true}
-		"runtime.pause":
-			if EditorInterface.is_playing_scene():
-				EditorInterface.set_pause_playing_scene(true)
-			return {"paused": true}
-		"runtime.resume":
-			if EditorInterface.is_playing_scene():
-				EditorInterface.set_pause_playing_scene(false)
-			return {"resumed": true}
+		"runtime.pause", "runtime.resume":
+			# EditorInterface has no public API to pause/resume the running scene in this Godot version.
+			return B.err("%s is not supported by this Godot version's EditorInterface API" % method)
 		"runtime.status":
 			return {
 				"playing": EditorInterface.is_playing_scene(),

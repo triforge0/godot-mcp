@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("console.") or method.begins_with("errors.") or method.begins_with("profiler.")
 
 
-static func call(method: String, _params: Variant) -> Variant:
+static func dispatch(method: String, _params: Variant) -> Variant:
 	match method:
 		"console.logs":
 			return {"logs": B.logs.duplicate()}

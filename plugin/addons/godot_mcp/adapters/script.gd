@@ -8,7 +8,7 @@ static func handles(method: String) -> bool:
 	return method.begins_with("script.")
 
 
-static func call(method: String, params: Variant) -> Variant:
+static func dispatch(method: String, params: Variant) -> Variant:
 	match method:
 		"script.read":
 			var path := str(B.param(params, "path", ""))
