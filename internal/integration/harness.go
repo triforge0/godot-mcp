@@ -3,6 +3,7 @@
 package integration
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -120,15 +122,15 @@ func StartStack(t *testing.T) *Stack {
 	}
 
 	bridgeURL := fmt.Sprintf("ws://%s/ws", addr)
-	cmd := launchEditor(t, env, bridgeURL)
+	cmd, output, exited := launchEditor(t, env, bridgeURL)
 	t.Cleanup(func() {
 		if cmd.Process != nil {
 			_ = cmd.Process.Kill()
 		}
 	})
 
-	if err := waitForPlugin(ws, godotConnectTimeout); err != nil {
-		t.Fatalf("plugin connect: %v", err)
+	if err := waitForPlugin(ws, godotConnectTimeout, exited); err != nil {
+		t.Fatalf("plugin connect: %v\n--- godot editor output ---\n%s", err, output.String())
 	}
 
 	client := godot.NewClient(ws)
@@ -206,7 +208,26 @@ func importProject(t *testing.T, env Env) error {
 	return nil
 }
 
-func launchEditor(t *testing.T, env Env, bridgeURL string) *exec.Cmd {
+// syncBuffer is a goroutine-safe io.Writer for capturing subprocess output
+// that's read concurrently (test failure message) while still being written to.
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (b *syncBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *syncBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
+}
+
+func launchEditor(t *testing.T, env Env, bridgeURL string) (*exec.Cmd, *syncBuffer, chan error) {
 	t.Helper()
 	args := []string{"--path", env.ProjectPath, "--editor"}
 	cmd := wrapDisplay(t, env.GodotBin, args...)
@@ -215,11 +236,16 @@ func launchEditor(t *testing.T, env Env, bridgeURL string) *exec.Cmd {
 		"GODOT_MCP_ALLOW_DESTRUCTIVE=1",
 		"GODOT_MCP_ALLOW_SCRIPT_EXEC=1",
 	)
+	output := &syncBuffer{}
+	cmd.Stdout = output
+	cmd.Stderr = output
 	if err := cmd.Start(); err != nil {
 		t.Fatalf("start godot editor: %v", err)
 	}
+	exited := make(chan error, 1)
+	go func() { exited <- cmd.Wait() }()
 	time.Sleep(godotStartupPause)
-	return cmd
+	return cmd, output, exited
 }
 
 func wrapDisplay(t *testing.T, godotBin string, args ...string) *exec.Cmd {
@@ -234,7 +260,7 @@ func wrapDisplay(t *testing.T, godotBin string, args ...string) *exec.Cmd {
 	return exec.Command(godotBin, args...)
 }
 
-func waitForPlugin(ws *bridge.WebSocket, timeout time.Duration) error {
+func waitForPlugin(ws *bridge.WebSocket, timeout time.Duration, exited chan error) error {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		if ws.Connected() {
@@ -243,7 +269,11 @@ func waitForPlugin(ws *bridge.WebSocket, timeout time.Duration) error {
 				return nil
 			}
 		}
-		time.Sleep(250 * time.Millisecond)
+		select {
+		case err := <-exited:
+			return fmt.Errorf("godot editor exited before plugin connected: %v", err)
+		case <-time.After(250 * time.Millisecond):
+		}
 	}
 	return fmt.Errorf("godot plugin did not connect within %s", timeout)
 }
