@@ -229,7 +229,10 @@ func (b *syncBuffer) String() string {
 
 func launchEditor(t *testing.T, env Env, bridgeURL string) (*exec.Cmd, *syncBuffer, chan error) {
 	t.Helper()
-	args := []string{"--path", env.ProjectPath, "--editor"}
+	// --headless avoids requiring a Vulkan-capable GPU: CI runners (and many
+	// dev machines) only offer llvmpipe/no GPU at all, which fails Godot 4's
+	// default Vulkan renderer well before the plugin ever gets a chance to connect.
+	args := []string{"--headless", "--path", env.ProjectPath, "--editor"}
 	cmd := wrapDisplay(t, env.GodotBin, args...)
 	cmd.Env = append(os.Environ(),
 		"GODOT_MCP_BRIDGE_URL="+bridgeURL,

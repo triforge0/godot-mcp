@@ -37,6 +37,7 @@ type PluginInfo struct {
 type WebSocket struct {
 	addr       string
 	mu         sync.RWMutex
+	writeMu    sync.Mutex // gorilla/websocket allows only one concurrent writer per conn
 	conn       *websocket.Conn
 	pending    map[string]chan Response
 	nextID     atomic.Uint64
@@ -250,7 +251,10 @@ func (s *WebSocket) Call(ctx context.Context, method string, params any) (json.R
 	if writeConn == nil {
 		return nil, ErrNotConnected
 	}
-	if err := writeConn.WriteMessage(websocket.TextMessage, payload); err != nil {
+	s.writeMu.Lock()
+	err = writeConn.WriteMessage(websocket.TextMessage, payload)
+	s.writeMu.Unlock()
+	if err != nil {
 		return nil, err
 	}
 
