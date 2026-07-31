@@ -6,10 +6,11 @@ import (
 	"strings"
 )
 
-const (
-	Name    = "godot-mcp"
-	Version = "1.0.0"
-)
+const Name = "godot-mcp"
+
+// Version is the released version. Release builds override it via
+// -ldflags "-X github.com/godot-mcp/godot-mcp/internal/version.Version=X.Y.Z".
+var Version = "1.0.0"
 
 type SemVer struct {
 	Major int
